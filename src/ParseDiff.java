@@ -22,6 +22,12 @@ import java.util.ArrayList;
 //  the hierarchical view
 //- Won't capture tags values with leading spaces but also meaningful content
 
+/**
+ * ParseDiff provides parsing of XML files. It detects changes in element
+ * values between two XML files.
+ * @author Taylor O'Brien
+ *
+ */
 public class ParseDiff extends DefaultHandler
 {
     //currStruct represents the current XML hierarchy (from the parsers) perspective
@@ -50,12 +56,18 @@ public class ParseDiff extends DefaultHandler
     //used to handle differences in structure resulting from empty tags
     boolean anticipatingText = false;
     
+    boolean badStructure = false;
+    
     ArrayList< String > output;
     
     XMLReader xr;
     
+    /**
+     * Constructor.
+     */
     public ParseDiff ()
     {
+    	// prepare XMLReader object for parsing
     	xr = null;
     	output = new ArrayList< String >();
     	
@@ -67,12 +79,18 @@ public class ParseDiff extends DefaultHandler
     	}
     	
     	if ( xr != null ) {
-    		//handler = new ParseDiff(); // this is the parser
     		xr.setContentHandler( this );
     		xr.setErrorHandler( this );
     	}
     }
     
+    /**
+     * Parses XML file and returns the changes between the files
+     * @param filePaths the paths to the files
+     * @return ArrayList<String> the changes in element values. If
+     * the structures of the XML files are not the same, an error
+     * message is returned instead.
+     */
     public ArrayList< String > beginParse( String [] filePaths ) {
     	FileReader r = null;
     	
@@ -93,12 +111,29 @@ public class ParseDiff extends DefaultHandler
 			}
 		    
             if ( i > 0 ) {
-                return printDiff();
+                ArrayList< String > output = printDiff();
+            	
+                // if the structures are different, output an error message.
+                // Other wise, return the output.
+                if (tagVals1.size() != tagVals2.size())
+            		badStructure = true;
+            	
+                if ( !badStructure )
+                	return output;
+                else if ( output == null ) {
+                	output = new ArrayList< String >();
+                	output.add( "ERROR: XML STRUCTURES ARE DIFFERENT" );
+                	return output;
+                }
             }
 		}
 		return null;
     }
 
+    /**
+     * Helper function for beginParse()
+     * @return
+     */
     private ArrayList< String > printDiff() {
     	//insanely messy, ugly, and unreadable code starts here!
         //the documents have been parsed, now the data needs to be compared,
@@ -106,6 +141,8 @@ public class ParseDiff extends DefaultHandler
         boolean firstDiff = false;
         int lastDiff = 0;
         
+        if ( badStructure )
+        	return null;
         //this loop steps through tagStruct, tagVals1, and tagVals2 concurrently,
         //looking for changes between the leaf nodes represented by tagVals1
         //and tagVals2.  if it finds any, it determines exactly how much of 
@@ -225,8 +262,11 @@ public class ParseDiff extends DefaultHandler
         if (firstParse) {
             tagVals1.add(s1 + s2);
             tagStruct.add(new ArrayList<String>(currStruct));
-        } else 
+        } else {
             tagVals2.add(s2);
+            if ( tagVals2.size() > tagVals1.size() || !tagStruct.get(tagVals2.size() - 1).equals(currStruct) )
+            	badStructure = true;
+        }
     }
 
 }

@@ -44,7 +44,7 @@ import java.util.ArrayList;
 /**
  * This class initializes the GUI of the program and registers event
  * listeners.
- * @author Alex
+ * @author Alex Oh
  *
  */
 public class Instrudiff_UI implements ActionListener {

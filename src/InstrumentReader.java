@@ -21,7 +21,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Parses and outputs all contents of the XML file.
- * @author Alex
+ * @author Alex Oh
  *
  */
 public class InstrumentReader extends DefaultHandler {
@@ -30,9 +30,7 @@ public class InstrumentReader extends DefaultHandler {
 	// parses each line. In the endElement() function the hierarchy is
 	// modified by moving one step back or up the hierarchy.
 	private ArrayList< DefaultMutableTreeNode > hierarchy = new ArrayList< DefaultMutableTreeNode >();
-	DefaultMutableTreeNode lastNode;
 	
-	private JTree xmlTree = null;
 	XMLReader xreader;
 	boolean anticipatingText;
 	
@@ -82,7 +80,9 @@ public class InstrumentReader extends DefaultHandler {
 		return hierarchy.get( 0 );
     }
 	
-	
+	/**
+	 * Adds a node to the hierarchy
+	 */
 	@Override
 	public void startElement( String uri, String name, 
 			String qName, Attributes atts ) {
@@ -93,6 +93,9 @@ public class InstrumentReader extends DefaultHandler {
 		hierarchy.add( node );
 	}
 	
+	/**
+	 * Removes a node from the hierarchy and adds it to its parent.
+	 */
 	@Override
 	public void endElement (String uri, String name, String qName) {
 		if ( hierarchy.size() <= 1 )
@@ -112,6 +115,9 @@ public class InstrumentReader extends DefaultHandler {
 		hierarchy.get( hierarchy.size() - 1 ).add( lastNode );
 	}
 	
+	/**
+	 * Add a node for the element's value.
+	 */
 	@Override
 	public void characters (char ch[], int start, int length) {
 		
